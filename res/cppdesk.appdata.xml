@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.cppdesk.CppDesk</id>
+  <name>cppdesk</name>
+  <summary>Cross-platform remote desktop</summary>
+  <url type="homepage">https://github.com/MaurerAnton/cppdesk</url>
+  <metadata_license>MIT</metadata_license>
+  <project_license>AGPL-3.0</project_license>
+</component>

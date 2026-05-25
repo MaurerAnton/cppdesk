@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=cppdesk
+Comment=Cross-platform remote desktop (client + server)
+Exec=cppdesk
+Icon=cppdesk
+Terminal=false
+Type=Application
+Categories=Network;RemoteAccess;
+Keywords=remote;desktop;VNC;RDP;TeamViewer;AnyDesk;
