@@ -39,7 +39,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build-android
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cppdesk-android
           path: flutter/build/app/outputs/flutter-apk/app-release.apk
