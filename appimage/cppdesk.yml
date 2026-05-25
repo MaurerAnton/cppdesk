@@ -1,0 +1,39 @@
+# AppImage build configuration for cppdesk
+version: 1
+AppDir:
+  app_info:
+    id: com.cppdesk.CppDesk
+    name: cppdesk
+    icon: cppdesk
+    version: 1.3.0
+    exec: usr/bin/cppdesk
+    exec_args: $@
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse'
+    include:
+      - libgtk-3-0
+      - libx11-6
+      - libxfixes3
+      - libxrandr2
+      - libpulse0
+      - libssl3
+      - libsqlite3-0
+      - libglib2.0-0
+      - libgdk-pixbuf2.0-0
+      - libcairo2
+      - libpango-1.0-0
+      - libstdc++6
+      - libgcc-s1
+  files:
+    include:
+      - usr/share/icons/**
+      - usr/share/applications/**
+  runtime:
+    env:
+      GTK_THEME: Adwaita:dark
+AppImage:
+  arch: x86_64
+  update-information: gh-releases-zsync|MaurerAnton|cppdesk|latest|*x86_64.AppImage.zsync

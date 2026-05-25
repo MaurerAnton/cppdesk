@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=cppdesk
+Comment=Cross-platform remote desktop (client + server)
+Exec=cppdesk
+Icon=com.cppdesk.CppDesk
+Terminal=false
+Type=Application
+Categories=Network;RemoteAccess;
+Keywords=remote;desktop;VNC;RDP;TeamViewer;AnyDesk;
+StartupWMClass=cppdesk
+MimeType=x-scheme-handler/rustdesk;
+X-Flatpak-RenamedFrom=cppdesk.desktop;

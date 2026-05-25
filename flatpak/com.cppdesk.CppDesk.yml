@@ -1,0 +1,40 @@
+app-id: com.cppdesk.CppDesk
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: cppdesk
+finish-args:
+  - --socket=wayland
+  - --socket=x11
+  - --socket=pulseaudio
+  - --share=ipc
+  - --share=network
+  - --device=dri
+  - --system-talk-name=org.freedesktop.portal.ScreenCast
+  - --talk-name=org.freedesktop.portal.Desktop
+  - --talk-name=org.freedesktop.Notifications
+  - --filesystem=home
+  - --filesystem=xdg-run/pipewire-0
+modules:
+  - name: cppdesk
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_CLIENT=ON
+      - -DBUILD_SERVER=ON
+      - -DBUILD_CLI=ON
+      - -DBUILD_TESTS=OFF
+      - -DENABLE_ENCRYPTION=ON
+      - -DENABLE_FLUTTER=ON
+    sources:
+      - type: git
+        url: https://github.com/MaurerAnton/cppdesk.git
+        tag: master
+    build-commands:
+      - cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/app
+      - cmake --build build --parallel $(nproc)
+      - cmake --install build
+    post-install:
+      - install -Dm644 res/cppdesk.desktop /app/share/applications/com.cppdesk.CppDesk.desktop
+      - install -Dm644 res/cppdesk.svg /app/share/icons/hicolor/scalable/apps/com.cppdesk.CppDesk.svg
+      - install -Dm644 res/cppdesk.metainfo.xml /app/share/metainfo/com.cppdesk.CppDesk.metainfo.xml

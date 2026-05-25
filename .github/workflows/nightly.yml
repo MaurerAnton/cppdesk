@@ -1,0 +1,23 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build nightly
+        run: |
+          sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ pkg-config libgtk-3-dev libx11-dev libxfixes-dev libxrandr-dev libpulse-dev libssl-dev libsqlite3-dev
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+          cmake --build build --parallel $(nproc)
+          cd build && ctest --output-on-failure
+      - name: Upload nightly
+        uses: actions/upload-artifact@v4
+        with:
+          name: cppdesk-nightly-${{ github.sha }}
+          path: build/cppdesk_*

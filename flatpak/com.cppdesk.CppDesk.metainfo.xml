@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.cppdesk.CppDesk</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>AGPL-3.0</project_license>
+  <name>cppdesk</name>
+  <summary>Cross-platform remote desktop (client + server)</summary>
+  <description>
+    <p>cppdesk is a C++ rewrite of RustDesk, providing remote desktop access
+    across Windows, Linux, macOS, Android, and iOS. Features include:</p>
+    <ul>
+      <li>End-to-end encrypted remote desktop connections</li>
+      <li>File transfer with resume support</li>
+      <li>Clipboard synchronization (text, files, images)</li>
+      <li>TCP tunneling and port forwarding</li>
+      <li>Multi-monitor support with per-display switching</li>
+      <li>Privacy mode with screen blanking</li>
+      <li>Hardware-accelerated video encoding (H264/H265/VP8/VP9/AV1)</li>
+      <li>Audio capture and playback (Opus codec)</li>
+      <li>Terminal access via PTY</li>
+      <li>Whiteboard collaboration</li>
+      <li>Chat messaging</li>
+    </ul>
+  </description>
+  <url type="homepage">https://github.com/MaurerAnton/cppdesk</url>
+  <url type="bugtracker">https://github.com/MaurerAnton/cppdesk/issues</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/MaurerAnton/cppdesk/master/res/screenshot.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="1.3.0" date="2025-05-25">
+      <description>
+        <p>Initial C++ release of cppdesk</p>
+        <ul>
+          <li>Full C++20 rewrite of all core modules</li>
+          <li>Windows, Linux, macOS, Android, iOS support</li>
+          <li>Hardware-accelerated video codecs</li>
+          <li>End-to-end encryption via libsodium</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1" />
+  <launchable type="desktop-id">com.cppdesk.CppDesk.desktop</launchable>
+</component>

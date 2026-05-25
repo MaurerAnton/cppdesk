@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  cppdesk-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maureranton/cppdesk:latest
+    container_name: cppdesk-server
+    command: cppdesk_server 21117
+    ports:
+      - "21116:21116/tcp"
+      - "21116:21116/udp"
+      - "21117:21117/tcp"
+      - "21118:21118/tcp"
+    restart: unless-stopped
+    volumes:
+      - cppdesk-data:/var/lib/cppdesk
+    environment:
+      - CPPDESK_ID_SERVER=rs.example.com
+    networks:
+      - cppdesk-net
+
+networks:
+  cppdesk-net:
+    driver: bridge
+
+volumes:
+  cppdesk-data:
