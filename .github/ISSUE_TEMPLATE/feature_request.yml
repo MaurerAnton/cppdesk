@@ -1,0 +1,12 @@
+name: Feature Request
+description: {tmpl.replace('_',' ')} for cppdesk
+title: '[{tmpl.split('_')[0]}] '
+labels: ['{tmpl.split('_')[0]}']
+body:
+  - type: markdown
+    attributes:
+      value: '## Description'
+  - type: textarea
+    attributes:
+      label: 'Details'
+      description: 'Please describe the {tmpl.replace('_',' ')}'

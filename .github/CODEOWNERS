@@ -1,0 +1,7 @@
+# Code owners
+* @MaurerAnton
+/src/platform/ @MaurerAnton
+/libs/ @MaurerAnton
+/flutter/ @MaurerAnton
+/docs/ @MaurerAnton
+/.github/ @MaurerAnton
