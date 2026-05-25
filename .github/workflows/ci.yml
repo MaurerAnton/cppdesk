@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ pkg-config
+          sudo apt-get install -y libgtk-3-dev libx11-dev libxfixes-dev
+          sudo apt-get install -y libxrandr-dev libpulse-dev
+          sudo apt-get install -y libssl-dev libsqlite3-dev
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel $env:NUMBER_OF_PROCESSORS
+      - name: Test
+        run: cd build && ctest --output-on-failure -C ${{ matrix.build_type }}
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install cmake ninja pkg-config openssl
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build --parallel $(sysctl -n hw.ncpu)
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (Android stub)
+        run: |
+          echo "Android NDK cross-compilation requires NDK setup"
+          mkdir -p build-android
+          echo "Stub: Android build would go here"
+      - name: Placeholder
+        run: echo "Android build configured"
+
+  package:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package
+        run: |
+          echo "Creating release packages..."
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          cd build
+          cpack -G DEB
+          cpack -G RPM
+          cpack -G ZIP
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: build/cppdesk-*

@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package cppdesk.proto;
+
+// ===== Rendezvous Messages =====
+
+message RegisterPeer {
+    string id = 1;
+    string password = 2;
+    string version = 3;
+    string platform = 4;
+    int32 nat_type = 5;
+    uint32 udp_port = 6;
+    string hostname = 7;
+    string alias = 8;
+}
+
+message RegisterPeerResponse {
+    bool success = 1;
+    string message = 2;
+    int32 code = 3;
+}
+
+message PunchHoleRequest {
+    string id = 1;
+    string token = 2;
+    int32 nat_type = 3;
+    string licence_key = 4;
+    int32 conn_type = 5;
+    string version = 6;
+    uint32 udp_port = 7;
+    bool force_relay = 8;
+    string socket_addr_v6 = 9;
+}
+
+message PunchHoleResponse {
+    string socket_addr = 1;
+    string relay_server = 2;
+    int32 nat_type = 3;
+    string uuid = 4;
+    string other_failure = 5;
+    bool is_local = 6;
+    
+    enum Failure {
+        ID_NOT_EXIST = 0;
+        OFFLINE = 1;
+        LICENSE_MISMATCH = 2;
+        TOO_MANY_CONNECTIONS = 3;
+    }
+    Failure failure = 7;
+    int32 version_mismatch = 8;
+}
+
+message RequestRelay {
+    string licence_key = 1;
+    string uuid = 2;
+}
+
+message Heartbeat {
+    string id = 1;
+    int64 timestamp = 2;
+}
+
+// ===== Peer Messages =====
+
+message LoginRequest {
+    string password = 1;
+    bool remember = 2;
+    bool view_only = 3;
+    string version = 4;
+    bool file_transfer_enabled = 5;
+    bool clipboard_enabled = 6;
+    bool audio_enabled = 7;
+}
+
+message LoginResponse {
+    bool success = 1;
+    string message = 2;
+    int32 code = 3;
+    bool view_only = 4;
+    
+    message Resolution {
+        uint32 width = 1;
+        uint32 height = 2;
+    }
+    Resolution display_resolution = 5;
+}
+
+message VideoFrame_ {
+    uint32 display = 1;
+    uint32 width = 2;
+    uint32 height = 3;
+    uint32 codec = 4;
+    uint64 timestamp = 5;
+    bool keyframe = 6;
+    bytes data = 7;
+}
+
+message AudioFrame_ {
+    uint32 sample_rate = 1;
+    uint32 channels = 2;
+    uint32 bits_per_sample = 3;
+    uint64 timestamp = 4;
+    bytes data = 5;
+}
+
+message MouseEvent_ {
+    int32 mask = 1;
+    int32 x = 2;
+    int32 y = 3;
+}
+
+message KeyEvent_ {
+    uint32 keycode = 1;
+    bool down = 2;
+    bool is_modifier = 3;
+    string sequence = 4;
+}
+
+message ClipboardMessage {
+    enum Type {
+        TEXT = 0;
+        FILE_LIST = 1;
+        IMAGE = 2;
+    }
+    Type type = 1;
+    bytes data = 2;
+}
+
+message FileTransferRequest {
+    string path = 1;
+    uint64 size = 2;
+    bool is_dir = 3;
+}
+
+message FileTransferResponse {
+    bool accepted = 1;
+    string message = 2;
+}
+
+message FileChunk {
+    uint64 offset = 1;
+    bytes data = 2;
+    bool is_last = 3;
+}
+
+message ChatMessage {
+    string sender = 1;
+    string text = 2;
+    int64 timestamp = 3;
+}
+
+// ===== Service Messages =====
+
+message SubscribeService {
+    string name = 1;
+    bool subscribe = 2;
+}
+
+message ServiceData {
+    string name = 1;
+    bytes data = 2;
+}
+
+// ===== Wrapper =====
+
+message Message {
+    oneof union {
+        RegisterPeer register_peer = 1;
+        RegisterPeerResponse register_peer_response = 2;
+        PunchHoleRequest punch_hole_request = 3;
+        PunchHoleResponse punch_hole_response = 4;
+        RequestRelay request_relay = 5;
+        Heartbeat heartbeat = 6;
+        LoginRequest login_request = 10;
+        LoginResponse login_response = 11;
+        VideoFrame_ video_frame = 20;
+        AudioFrame_ audio_frame = 30;
+        MouseEvent_ mouse_event = 40;
+        KeyEvent_ key_event = 41;
+        ClipboardMessage clipboard = 50;
+        FileTransferRequest file_request = 60;
+        FileTransferResponse file_response = 61;
+        FileChunk file_chunk = 62;
+        ChatMessage chat = 71;
+        SubscribeService subscribe_service = 80;
+        ServiceData service_data = 82;
+    }
+}

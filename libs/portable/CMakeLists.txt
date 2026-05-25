@@ -1,0 +1,2 @@
+add_library(cppdesk_portable INTERFACE)
+target_include_directories(cppdesk_portable INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -1,0 +1,31 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'flutter/**'
+  pull_request:
+    paths:
+      - 'flutter/**'
+
+jobs:
+  flutter-analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+      - run: cd flutter && flutter pub get
+      - run: cd flutter && flutter analyze
+
+  flutter-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+      - run: cd flutter && flutter pub get
+      - run: cd flutter && flutter test

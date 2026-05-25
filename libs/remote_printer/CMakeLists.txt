@@ -1,0 +1,2 @@
+add_library(cppdesk_remote_printer INTERFACE)
+target_include_directories(cppdesk_remote_printer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

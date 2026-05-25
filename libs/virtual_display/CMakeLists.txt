@@ -1,0 +1,2 @@
+add_library(cppdesk_virtual_display INTERFACE)
+target_include_directories(cppdesk_virtual_display INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

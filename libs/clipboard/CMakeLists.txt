@@ -1,0 +1,2 @@
+add_library(cppdesk_clipboard INTERFACE)
+target_include_directories(cppdesk_clipboard INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
