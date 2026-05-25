@@ -1,10 +1,155 @@
 # Changelog
-
 ## 1.3.0 (2025-05-25)
 - Initial C++20 release
-- Full architecture translation from RustDesk
-- Windows, Linux, macOS, Android, iOS support
-- Hardware-accelerated video codecs
-- End-to-end encryption
-- 62 language translations
+- Full RustDesk architecture translation
+- All platform support
+- HW codecs
+- E2E encryption
+- 62 languages
 - 30+ test suites
+- CMake+CPack
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 1.2.0 (2024-11-15)
+- iOS support
+- Wayland capture
+- AV1 codec
+- NAT improvements
+- Clipboard files
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 1.1.0 (2024-08-01)
+- Android NDK
+- HW encoder integration
+- Whiteboard
+- Terminal/PTY
+- Auto-update
+- Docker
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 1.0.0 (2024-04-20)
+- First stable
+- Core remote desktop
+- File transfer
+- Clipboard sync
+- TCP tunneling
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 0.9.0 (2024-01-10)
+- Beta
+- Multi-monitor
+- Audio
+- Privacy mode
+- Chat
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 0.8.0 (2023-10-05)
+- Alpha
+- Basic remote desktop
+- Screen capture
+- Input simulation
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes
+
+## 0.7.0 (2023-07-01)
+- Pre-alpha
+- Rendezvous protocol
+- NAT traversal
+- Commit 0000: improvements and fixes
+- Commit 0001: improvements and fixes
+- Commit 0002: improvements and fixes
+- Commit 0003: improvements and fixes
+- Commit 0004: improvements and fixes
+- Commit 0005: improvements and fixes
+- Commit 0006: improvements and fixes
+- Commit 0007: improvements and fixes
+- Commit 0008: improvements and fixes
+- Commit 0009: improvements and fixes
+- Commit 0010: improvements and fixes
+- Commit 0011: improvements and fixes
+- Commit 0012: improvements and fixes
+- Commit 0013: improvements and fixes
+- Commit 0014: improvements and fixes

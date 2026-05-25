@@ -1,0 +1,11 @@
+{
+  "name": "cppdesk",
+  "version": "1.3.0",
+  "description": "C++ rewrite of RustDesk",
+  "scripts": {
+    "build": "cmake --build build",
+    "test": "cd build && ctest",
+    "format": "clang-format -i src/**/*.cpp"
+  },
+  "repository": "https://github.com/MaurerAnton/cppdesk"
+}
