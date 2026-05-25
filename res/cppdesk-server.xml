@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+  <id>cppdesk-server</id>
+  <name>cppdesk Remote Desktop Server</name>
+  <description>Cross-platform remote desktop server</description>
+  <executable>cppdesk_server.exe</executable>
+  <arguments></arguments>
+  <logpath>C:\ProgramData\cppdesk\logs</logpath>
+  <logmode>roll</logmode>
+  <depend>tcpip</depend>
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="30 sec"/>
+  <onfailure action="none"/>
+  <resetPeriod>1 day</resetPeriod>
+</service>

@@ -1,0 +1,57 @@
+{
+  "name": "cppdesk",
+  "version": "1.3.0",
+  "description": "C++ rewrite of RustDesk - cross-platform remote desktop",
+  "homepage": "https://github.com/MaurerAnton/cppdesk",
+  "license": "AGPL-3.0",
+  "dependencies": [
+    {
+      "name": "protobuf",
+      "version>=": "3.21.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.0"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.12.0"
+    },
+    {
+      "name": "asio",
+      "version>=": "1.28.0"
+    },
+    {
+      "name": "openssl",
+      "version>=": "3.0.0"
+    },
+    {
+      "name": "libsodium",
+      "version>=": "1.0.18"
+    },
+    {
+      "name": "sqlite3",
+      "version>=": "3.40.0"
+    },
+    {
+      "name": "cli11",
+      "version>=": "2.3.0"
+    },
+    {
+      "name": "gtest",
+      "version>=": "1.14.0"
+    }
+  ],
+  "features": {
+    "flutter": {
+      "description": "Enable Flutter UI support"
+    },
+    "hwcodec": {
+      "description": "Enable hardware-accelerated video codecs"
+    },
+    "wayland": {
+      "description": "Enable Wayland screen capture"
+    }
+  },
+  "default-features": ["flutter", "hwcodec", "wayland"]
+}

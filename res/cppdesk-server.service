@@ -1,0 +1,23 @@
+[Unit]
+Description=cppdesk Remote Desktop Server
+Documentation=https://github.com/MaurerAnton/cppdesk
+After=network.target
+
+[Service]
+Type=simple
+User=cppdesk
+Group=cppdesk
+ExecStart=/usr/bin/cppdesk_server
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+LimitNPROC=4096
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/cppdesk
+ReadOnlyPaths=/etc/cppdesk
+
+[Install]
+WantedBy=multi-user.target
