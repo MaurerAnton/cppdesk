@@ -1,0 +1,83 @@
+// Language: ta — auto-generated from locale template
+#include <string>
+#include <map>
+
+namespace cppdesk::lang {
+
+static std::map<std::string, std::string> g_locale_ta = {
+    {"app_name", "cppdesk"},
+    {"your_id", "Your ID"},
+    {"remote_id", "Remote ID"},
+    {"connect", "Connect"},
+    {"disconnect", "Disconnect"},
+    {"connecting", "Connecting..."},
+    {"connected", "Connected"},
+    {"disconnected", "Disconnected"},
+    {"connection_ready", "Connection ready"},
+    {"reconnecting", "Reconnecting..."},
+    {"enter_password", "Enter password"},
+    {"password", "Password"},
+    {"wrong_password", "Wrong password"},
+    {"empty_password", "Empty password"},
+    {"offline", "Offline"},
+    {"online", "Online"},
+    {"settings", "Settings"},
+    {"about", "About"},
+    {"version", "Version"},
+    {"cancel", "Cancel"},
+    {"ok", "OK"},
+    {"yes", "Yes"},
+    {"no", "No"},
+    {"save", "Save"},
+    {"delete", "Delete"},
+    {"edit", "Edit"},
+    {"enable", "Enable"},
+    {"disable", "Disable"},
+    {"file_transfer", "File Transfer"},
+    {"clipboard", "Clipboard"},
+    {"audio", "Audio"},
+    {"video", "Video"},
+    {"display", "Display"},
+    {"resolution", "Resolution"},
+    {"quality", "Quality"},
+    {"bitrate", "Bitrate"},
+    {"fps", "FPS"},
+    {"codec", "Codec"},
+    {"keyboard", "Keyboard"},
+    {"mouse", "Mouse"},
+    {"view_only", "View Only"},
+    {"privacy_mode", "Privacy Mode"},
+    {"force_relay", "Force Relay"},
+    {"security", "Security"},
+    {"encryption", "Encryption"},
+    {"update", "Update"},
+    {"restart", "Restart"},
+    {"shutdown", "Shutdown"},
+    {"server", "Server"},
+    {"client", "Client"},
+    {"network", "Network"},
+    {"language", "Language"},
+    {"theme", "Theme"},
+    {"fullscreen", "Fullscreen"},
+    {"minimize", "Minimize"},
+    {"maximize", "Maximize"},
+    {"chat", "Chat"},
+    {"whiteboard", "Whiteboard"},
+    {"port_forward", "Port Forward"},
+    {"install", "Install"},
+    {"uninstall", "Uninstall"},
+    {"service", "Service"},
+    {"start_service", "Start Service"},
+    {"stop_service", "Stop Service"},
+    {"help", "Help"},
+    {"feedback", "Feedback"},
+    {"donate", "Donate"},
+    {"license", "License"},
+};
+
+std::string get_text_ta(const std::string& key) {
+    auto it = g_locale_ta.find(key);
+    return it != g_locale_ta.end() ? it->second : key;
+}
+
+} // namespace cppdesk::lang
