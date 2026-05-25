@@ -27,7 +27,7 @@ jobs:
             sanitizers: ON
     runs-on: \${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup compiler
         if: matrix.compiler != 'default'
         run: |
