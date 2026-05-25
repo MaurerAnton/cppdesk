@@ -23,7 +23,7 @@ jobs:
           flutter pub get
           flutter build ios --release --no-codesign
       - name: Upload IPA
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cppdesk-ios
           path: flutter/build/ios/iphoneos/Runner.app
