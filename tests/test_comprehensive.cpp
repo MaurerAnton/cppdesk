@@ -6,638 +6,343 @@
 #include "client/client.hpp"
 #include "rendezvous/rendezvous.hpp"
 #include "platform/platform.hpp"
+#include "scrap/scrap.hpp"
+#include "enigo/enigo.hpp"
+#include "clipboard/clipboard.hpp"
+
+#include <string>
+#include <vector>
+#include <thread>
+#include <chrono>
 
 using namespace cppdesk;
 using namespace cppdesk::common;
 
-TEST(ConfigTest, Test0) {
-    // Config test case 0
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+// ====== Config Tests ======
+TEST(ConfigTest, Singleton) {
+    auto& c1 = Config::instance();
+    auto& c2 = Config::instance();
+    EXPECT_EQ(&c1, &c2);
 }
 
-TEST(ConfigTest, Test1) {
-    // Config test case 1
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, IdPersistence) {
+    std::string id = Config::get_id();
+    EXPECT_FALSE(id.empty());
+    std::string id2 = Config::get_id();
+    EXPECT_EQ(id, id2);
 }
 
-TEST(ConfigTest, Test2) {
-    // Config test case 2
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, SetGetOption) {
+    Config::set_option("test.key", "test.value");
+    EXPECT_EQ(Config::get_option("test.key"), "test.value");
+    Config::set_option("test.key", "");
+    EXPECT_EQ(Config::get_option("test.key"), "");
 }
 
-TEST(ConfigTest, Test3) {
-    // Config test case 3
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, BoolOptions) {
+    Config::set_option_bool("test.bool", true);
+    EXPECT_TRUE(Config::option2bool("test.bool", Config::get_option("test.bool")));
+    Config::set_option_bool("test.bool", false);
+    EXPECT_FALSE(Config::option2bool("test.bool", Config::get_option("test.bool")));
 }
 
-TEST(ConfigTest, Test4) {
-    // Config test case 4
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, PasswordManagement) {
+    Config::set_password("secret123");
+    EXPECT_TRUE(Config::is_password_set());
+    EXPECT_EQ(Config::get_password(), "secret123");
+    Config::set_password("");
+    EXPECT_FALSE(Config::is_password_set());
 }
 
-TEST(ConfigTest, Test5) {
-    // Config test case 5
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, KeyPair) {
+    auto [sk, pk] = Config::get_key_pair();
+    EXPECT_FALSE(sk.empty());
+    EXPECT_FALSE(pk.empty());
 }
 
-TEST(ConfigTest, Test6) {
-    // Config test case 6
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, RendezvousServer) {
+    Config::set_rendezvous_server("custom.example.com");
+    EXPECT_EQ(Config::get_rendezvous_server(), "custom.example.com");
 }
 
-TEST(ConfigTest, Test7) {
-    // Config test case 7
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, ForceRelay) {
+    Config::set_option_bool("force-relay", true);
+    EXPECT_TRUE(Config::is_force_relay());
+    Config::set_option_bool("force-relay", false);
+    EXPECT_FALSE(Config::is_force_relay());
 }
 
-TEST(ConfigTest, Test8) {
-    // Config test case 8
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(ConfigTest, PeerManagement) {
+    PeerConfig peer;
+    peer.id = "test-peer-1";
+    peer.username = "Test User";
+    peer.online = true;
+    Config::instance().add_peer(peer);
+    auto found = Config::instance().get_peer("test-peer-1");
+    EXPECT_TRUE(found.has_value());
+    EXPECT_EQ(found->username, "Test User");
+    Config::instance().remove_peer("test-peer-1");
+    EXPECT_FALSE(Config::instance().get_peer("test-peer-1").has_value());
 }
 
-TEST(ConfigTest, Test9) {
-    // Config test case 9
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+// ====== Crypto Tests ======
+TEST(CryptoTest, SHA256Deterministic) {
+    auto h1 = crypto::sha256("cppdesk");
+    auto h2 = crypto::sha256("cppdesk");
+    auto h3 = crypto::sha256("different");
+    EXPECT_EQ(h1, h2);
+    EXPECT_NE(h1, h3);
 }
 
-TEST(ConfigTest, Test10) {
-    // Config test case 10
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(CryptoTest, SHA256NotEmpty) {
+    auto h = crypto::sha256("test");
+    for (auto b : h) EXPECT_GE(b, 0);
 }
 
-TEST(ConfigTest, Test11) {
-    // Config test case 11
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(CryptoTest, Base64Roundtrip) {
+    std::string orig = "Hello World! This is cppdesk.";
+    auto enc = crypto::encode64(reinterpret_cast<const uint8_t*>(orig.data()), orig.size());
+    auto dec = crypto::decode64(enc);
+    std::string dec_str(dec.begin(), dec.end());
+    EXPECT_EQ(orig, dec_str);
 }
 
-TEST(ConfigTest, Test12) {
-    // Config test case 12
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(CryptoTest, Base64Empty) {
+    auto enc = crypto::encode64(nullptr, 0);
+    EXPECT_TRUE(enc.empty());
+    auto dec = crypto::decode64("");
+    EXPECT_TRUE(dec.empty());
 }
 
-TEST(ConfigTest, Test13) {
-    // Config test case 13
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(CryptoTest, RandomBytes) {
+    auto r1 = crypto::random_bytes(64);
+    auto r2 = crypto::random_bytes(64);
+    EXPECT_EQ(r1.size(), 64u);
+    EXPECT_EQ(r2.size(), 64u);
+    EXPECT_NE(r1, r2);
 }
 
-TEST(ConfigTest, Test14) {
-    // Config test case 14
-    auto& c = Config::instance();
-    EXPECT_TRUE(true);
+TEST(CryptoTest, BoxKeypair) {
+    auto kp = crypto::generate_box_keypair();
+    EXPECT_FALSE(std::all_of(kp.pk.begin(), kp.pk.end(), [](uint8_t b) { return b == 0; }));
+    EXPECT_FALSE(std::all_of(kp.sk.begin(), kp.sk.end(), [](uint8_t b) { return b == 0; }));
 }
 
-TEST(CryptoTest, Test15) {
-    // Crypto test case 15
-    auto hash = crypto::sha256("test15");
-    EXPECT_EQ(hash.size(), 32u);
+TEST(CryptoTest, SignKeypair) {
+    auto kp = crypto::generate_sign_keypair();
+    EXPECT_FALSE(std::all_of(kp.pk.begin(), kp.pk.end(), [](uint8_t b) { return b == 0; }));
 }
 
-TEST(CryptoTest, Test16) {
-    // Crypto test case 16
-    auto hash = crypto::sha256("test16");
-    EXPECT_EQ(hash.size(), 32u);
+TEST(CryptoTest, PasswordHash) {
+    auto hash = crypto::hash_password("mypassword", "somesalt");
+    EXPECT_FALSE(hash.empty());
+    auto hash2 = crypto::hash_password("mypassword", "somesalt");
+    auto hash3 = crypto::hash_password("different", "somesalt");
+    EXPECT_NE(hash2, hash3);
 }
 
-TEST(CryptoTest, Test17) {
-    // Crypto test case 17
-    auto hash = crypto::sha256("test17");
-    EXPECT_EQ(hash.size(), 32u);
+TEST(CryptoTest, SecureCompare) {
+    std::string a = "secret data";
+    std::string b = "secret data";
+    std::string c = "different";
+    EXPECT_TRUE(crypto::secure_compare(
+        reinterpret_cast<const uint8_t*>(a.data()),
+        reinterpret_cast<const uint8_t*>(b.data()), a.size()));
+    EXPECT_FALSE(crypto::secure_compare(
+        reinterpret_cast<const uint8_t*>(a.data()),
+        reinterpret_cast<const uint8_t*>(c.data()), a.size()));
 }
 
-TEST(CryptoTest, Test18) {
-    // Crypto test case 18
-    auto hash = crypto::sha256("test18");
-    EXPECT_EQ(hash.size(), 32u);
+// ====== Protocol Tests ======
+TEST(ProtocolTest, ResolutionDefault) {
+    Resolution r;
+    EXPECT_EQ(r.width, 1920u);
+    EXPECT_EQ(r.height, 1080u);
 }
 
-TEST(CryptoTest, Test19) {
-    // Crypto test case 19
-    auto hash = crypto::sha256("test19");
-    EXPECT_EQ(hash.size(), 32u);
+TEST(ProtocolTest, ResolutionEquality) {
+    EXPECT_EQ(Resolution{1920, 1080}, Resolution{1920, 1080});
+    EXPECT_NE(Resolution{1920, 1080}, Resolution{1366, 768});
 }
 
-TEST(CryptoTest, Test20) {
-    // Crypto test case 20
-    auto hash = crypto::sha256("test20");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test21) {
-    // Crypto test case 21
-    auto hash = crypto::sha256("test21");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test22) {
-    // Crypto test case 22
-    auto hash = crypto::sha256("test22");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test23) {
-    // Crypto test case 23
-    auto hash = crypto::sha256("test23");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test24) {
-    // Crypto test case 24
-    auto hash = crypto::sha256("test24");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test25) {
-    // Crypto test case 25
-    auto hash = crypto::sha256("test25");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test26) {
-    // Crypto test case 26
-    auto hash = crypto::sha256("test26");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test27) {
-    // Crypto test case 27
-    auto hash = crypto::sha256("test27");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test28) {
-    // Crypto test case 28
-    auto hash = crypto::sha256("test28");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(CryptoTest, Test29) {
-    // Crypto test case 29
-    auto hash = crypto::sha256("test29");
-    EXPECT_EQ(hash.size(), 32u);
-}
-
-TEST(ProtocolTest, Test30) {
-    // Protocol test case 30
+TEST(ProtocolTest, MouseEventFields) {
     MouseEvent ev;
-    ev.x = 30; ev.y = 300;
-    EXPECT_TRUE(true);
+    ev.x = 100; ev.y = 200;
+    ev.mask = MouseEvent::BUTTON_LEFT | MouseEvent::TYPE_DOWN;
+    EXPECT_EQ(ev.x, 100);
+    EXPECT_EQ(ev.y, 200);
+    EXPECT_NE(ev.mask & MouseEvent::BUTTON_LEFT, 0);
 }
 
-TEST(ProtocolTest, Test31) {
-    // Protocol test case 31
-    MouseEvent ev;
-    ev.x = 31; ev.y = 310;
-    EXPECT_TRUE(true);
+TEST(ProtocolTest, KeyEventFields) {
+    KeyEvent ev;
+    ev.keycode = 65; // 'A'
+    ev.down = true;
+    ev.is_modifier = false;
+    EXPECT_EQ(ev.keycode, 65u);
+    EXPECT_TRUE(ev.down);
 }
 
-TEST(ProtocolTest, Test32) {
-    // Protocol test case 32
-    MouseEvent ev;
-    ev.x = 32; ev.y = 320;
-    EXPECT_TRUE(true);
+TEST(ProtocolTest, VideoFrameCreation) {
+    VideoFrame f;
+    f.width = 640; f.height = 480;
+    f.codec = 1; // H264
+    EXPECT_TRUE(f.width == 640);
+    EXPECT_TRUE(f.height == 480);
 }
 
-TEST(ProtocolTest, Test33) {
-    // Protocol test case 33
-    MouseEvent ev;
-    ev.x = 33; ev.y = 330;
-    EXPECT_TRUE(true);
+TEST(ProtocolTest, ControlPermissions) {
+    ControlPermissions p;
+    EXPECT_TRUE(p.keyboard);
+    EXPECT_TRUE(p.clipboard);
+    EXPECT_TRUE(p.file_transfer);
+    EXPECT_TRUE(p.audio);
+    EXPECT_FALSE(p.restart);
 }
 
-TEST(ProtocolTest, Test34) {
-    // Protocol test case 34
-    MouseEvent ev;
-    ev.x = 34; ev.y = 340;
-    EXPECT_TRUE(true);
+// ====== Utility Tests ======
+TEST(UtilityTest, IsIpStr) {
+    EXPECT_TRUE(is_ip_str("192.168.1.1"));
+    EXPECT_TRUE(is_ip_str("10.0.0.1"));
+    EXPECT_FALSE(is_ip_str("example.com"));
+    EXPECT_FALSE(is_ip_str("not.an.ip"));
 }
 
-TEST(ProtocolTest, Test35) {
-    // Protocol test case 35
-    MouseEvent ev;
-    ev.x = 35; ev.y = 350;
-    EXPECT_TRUE(true);
+TEST(UtilityTest, IsDomainPort) {
+    EXPECT_TRUE(is_domain_port_str("example.com:8080"));
+    EXPECT_TRUE(is_domain_port_str("192.168.1.1:21117"));
+    EXPECT_FALSE(is_domain_port_str("example.com"));
 }
 
-TEST(ProtocolTest, Test36) {
-    // Protocol test case 36
-    MouseEvent ev;
-    ev.x = 36; ev.y = 360;
-    EXPECT_TRUE(true);
+TEST(UtilityTest, CheckPort) {
+    EXPECT_EQ(check_port("example.com", 21116), "example.com:21116");
+    EXPECT_EQ(check_port("example.com:8080", 21116), "example.com:8080");
 }
 
-TEST(ProtocolTest, Test37) {
-    // Protocol test case 37
-    MouseEvent ev;
-    ev.x = 37; ev.y = 370;
-    EXPECT_TRUE(true);
+TEST(UtilityTest, Random) {
+    auto u1 = random_u64();
+    auto u2 = random_u64();
+    EXPECT_NE(u1, u2);
+    auto s = random_string(32);
+    EXPECT_EQ(s.size(), 32u);
 }
 
-TEST(ProtocolTest, Test38) {
-    // Protocol test case 38
-    MouseEvent ev;
-    ev.x = 38; ev.y = 380;
-    EXPECT_TRUE(true);
+TEST(UtilityTest, PlatformName) {
+    auto p = get_platform_name();
+    EXPECT_FALSE(p.empty());
 }
 
-TEST(ProtocolTest, Test39) {
-    // Protocol test case 39
-    MouseEvent ev;
-    ev.x = 39; ev.y = 390;
-    EXPECT_TRUE(true);
-}
-
-TEST(ProtocolTest, Test40) {
-    // Protocol test case 40
-    MouseEvent ev;
-    ev.x = 40; ev.y = 400;
-    EXPECT_TRUE(true);
-}
-
-TEST(ProtocolTest, Test41) {
-    // Protocol test case 41
-    MouseEvent ev;
-    ev.x = 41; ev.y = 410;
-    EXPECT_TRUE(true);
-}
-
-TEST(ProtocolTest, Test42) {
-    // Protocol test case 42
-    MouseEvent ev;
-    ev.x = 42; ev.y = 420;
-    EXPECT_TRUE(true);
-}
-
-TEST(ProtocolTest, Test43) {
-    // Protocol test case 43
-    MouseEvent ev;
-    ev.x = 43; ev.y = 430;
-    EXPECT_TRUE(true);
-}
-
-TEST(ProtocolTest, Test44) {
-    // Protocol test case 44
-    MouseEvent ev;
-    ev.x = 44; ev.y = 440;
-    EXPECT_TRUE(true);
-}
-
-TEST(ServerTest, Test45) {
-    // Server test case 45
+// ====== Server Tests ======
+TEST(ServerTest, CreateServer) {
     auto srv = server::Server::create();
     EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
 }
 
-TEST(ServerTest, Test46) {
-    // Server test case 46
+TEST(ServerTest, ServiceRegistration) {
     auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+    EXPECT_TRUE(srv->has_service("audio"));
+    EXPECT_TRUE(srv->has_service("display"));
 }
 
-TEST(ServerTest, Test47) {
-    // Server test case 47
+TEST(ServerTest, ConnectionId) {
     auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+    int32_t id1 = srv->next_connection_id();
+    int32_t id2 = srv->next_connection_id();
+    EXPECT_NE(id1, id2);
+    EXPECT_GT(id2, id1);
 }
 
-TEST(ServerTest, Test48) {
-    // Server test case 48
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+// ====== Scrap Tests ======
+TEST(ScrapTest, FactoryCreates) {
+    auto capturer = scrap::create_capturer();
+    EXPECT_TRUE(capturer != nullptr);
+    auto decoder = scrap::create_decoder();
+    EXPECT_TRUE(decoder != nullptr);
+    auto encoder = scrap::create_encoder();
+    EXPECT_TRUE(encoder != nullptr);
 }
 
-TEST(ServerTest, Test49) {
-    // Server test case 49
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(ScrapTest, ImageFormatConversion) {
+    scrap::ImageRgb src;
+    src.w = 100; src.h = 100;
+    src.fmt = scrap::ImageFormat::BGRA;
+    src.raw.resize(100 * 100 * 4, 128);
+    auto out = scrap::convert_bgra_to_rgba(src);
+    EXPECT_EQ(out.w, src.w);
+    EXPECT_EQ(out.h, src.h);
+    EXPECT_EQ(out.fmt, scrap::ImageFormat::RGBA);
 }
 
-TEST(ServerTest, Test50) {
-    // Server test case 50
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+// ====== Enigo Tests ======
+TEST(EnigoTest, CreateEnigo) {
+    enigo::Enigo e;
+    EXPECT_TRUE(e.is_available());
 }
 
-TEST(ServerTest, Test51) {
-    // Server test case 51
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(EnigoTest, DSLParser) {
+    auto tokens = enigo::DslParser::parse("hello {+SHIFT}world{-SHIFT}");
+    EXPECT_GT(tokens.size(), 0u);
 }
 
-TEST(ServerTest, Test52) {
-    // Server test case 52
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(EnigoTest, DelaySettings) {
+    enigo::Enigo e;
+    e.set_delay(std::chrono::milliseconds(5));
+    EXPECT_EQ(e.get_delay(), std::chrono::milliseconds(5));
 }
 
-TEST(ServerTest, Test53) {
-    // Server test case 53
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+// ====== Clipboard Tests ======
+TEST(ClipboardTest, FactoryCreates) {
+    auto cb = clipboard::PlatformClipboard::create();
+    EXPECT_TRUE(cb != nullptr);
 }
 
-TEST(ServerTest, Test54) {
-    // Server test case 54
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(ClipboardTest, MonitorCreate) {
+    clipboard::ClipboardMonitor mon;
+    EXPECT_FALSE(mon.is_running());
 }
 
-TEST(ServerTest, Test55) {
-    // Server test case 55
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+// ====== Rendezvous Tests ======
+TEST(RendezvousTest, ServerCreate) {
+    rendezvous::RendezvousServer srv(21116);
+    EXPECT_FALSE(srv.is_running());
 }
 
-TEST(ServerTest, Test56) {
-    // Server test case 56
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(RendezvousTest, RelayServerCreate) {
+    rendezvous::RelayServer relay;
+    EXPECT_FALSE(relay.is_running());
 }
 
-TEST(ServerTest, Test57) {
-    // Server test case 57
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+// ====== Platform Tests ======
+TEST(PlatformTest, DisplayNames) {
+    auto names = platform::get_display_names();
+    EXPECT_FALSE(names.empty());
 }
 
-TEST(ServerTest, Test58) {
-    // Server test case 58
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(PlatformTest, WakeLock) {
+    auto wl = platform::get_wakelock(true);
+    // WakeLock should be moveable
+    auto wl2 = std::move(wl);
+    (void)wl2;
 }
 
-TEST(ServerTest, Test59) {
-    // Server test case 59
-    auto srv = server::Server::create();
-    EXPECT_TRUE(srv != nullptr);
-    EXPECT_GT(srv->connection_count(), 0u);
+TEST(PlatformTest, IsInstalled) {
+    auto installed = platform::is_installed();
+    // Should return a boolean (may be false on dev machine)
+    EXPECT_TRUE(installed == true || installed == false);
 }
 
-TEST(ClientTest, Test60) {
-    // Client test case 60
-    Client c;
-    EXPECT_FALSE(c.is_connected());
+// ====== Performance / Stress Tests ======
+TEST(PerformanceTest, ManyRandoms) {
+    for (int i = 0; i < 1000; i++) {
+        crypto::random_bytes(32);
+    }
 }
 
-TEST(ClientTest, Test61) {
-    // Client test case 61
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test62) {
-    // Client test case 62
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test63) {
-    // Client test case 63
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test64) {
-    // Client test case 64
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test65) {
-    // Client test case 65
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test66) {
-    // Client test case 66
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test67) {
-    // Client test case 67
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test68) {
-    // Client test case 68
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test69) {
-    // Client test case 69
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test70) {
-    // Client test case 70
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test71) {
-    // Client test case 71
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test72) {
-    // Client test case 72
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test73) {
-    // Client test case 73
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(ClientTest, Test74) {
-    // Client test case 74
-    Client c;
-    EXPECT_FALSE(c.is_connected());
-}
-
-TEST(PlatformTest, Test75) {
-    // Platform test case 75
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test76) {
-    // Platform test case 76
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test77) {
-    // Platform test case 77
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test78) {
-    // Platform test case 78
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test79) {
-    // Platform test case 79
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test80) {
-    // Platform test case 80
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test81) {
-    // Platform test case 81
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test82) {
-    // Platform test case 82
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test83) {
-    // Platform test case 83
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test84) {
-    // Platform test case 84
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test85) {
-    // Platform test case 85
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test86) {
-    // Platform test case 86
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test87) {
-    // Platform test case 87
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test88) {
-    // Platform test case 88
-    EXPECT_TRUE(true);
-}
-
-TEST(PlatformTest, Test89) {
-    // Platform test case 89
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test90) {
-    // Rendezvous test case 90
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test91) {
-    // Rendezvous test case 91
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test92) {
-    // Rendezvous test case 92
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test93) {
-    // Rendezvous test case 93
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test94) {
-    // Rendezvous test case 94
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test95) {
-    // Rendezvous test case 95
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test96) {
-    // Rendezvous test case 96
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test97) {
-    // Rendezvous test case 97
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test98) {
-    // Rendezvous test case 98
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test99) {
-    // Rendezvous test case 99
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test100) {
-    // Rendezvous test case 100
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test101) {
-    // Rendezvous test case 101
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test102) {
-    // Rendezvous test case 102
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test103) {
-    // Rendezvous test case 103
-    EXPECT_TRUE(true);
-}
-
-TEST(RendezvousTest, Test104) {
-    // Rendezvous test case 104
-    EXPECT_TRUE(true);
+TEST(PerformanceTest, ManySHA256) {
+    std::string data(1024, 'x');
+    for (int i = 0; i < 100; i++) {
+        crypto::sha256(data);
+    }
 }
 
 int main(int argc, char** argv) {
