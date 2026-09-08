@@ -19,13 +19,14 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 | 05 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 2: config + fs layer | `examples/05_d1013487_source_code_part2/` |
 | 06 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 3: transport (tcp/udp) | `examples/06_d1013487_source_code_part3/` |
 | 07 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 4: protobuf structs | `examples/07_d1013487_source_code_part4/` |
+| 08 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 5: app common + Config methods | `examples/08_d1013487_source_code_part5/` |
 
 One upstream commit may span several steps when it is too large for a single
 accurate port (here `d1013487`: 175 files). Parts are numbered in the step
 subject until the commit is fully translated.
 
-Next in upstream `master` order: `d1013487` parts 5+ (app modules),
-then `f43f5df9`.
+Next in upstream `master` order: `d1013487` parts 6+ (fs jobs, rendezvous,
+client/server/platform/ui), then `f43f5df9`.
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 
@@ -43,8 +44,8 @@ cmake --build /tmp/cppdesk-build --parallel "$JOBS"  # $JOBS from AGENTS.md rule
 Each `examples/NN_*/` snapshot builds standalone the same way:
 
 ```bash
-cmake -B /tmp/b-07 -S examples/07_d1013487_source_code_part4 -DCMAKE_BUILD_TYPE=Release
-cmake --build /tmp/b-07 --parallel "$JOBS"
+cmake -B /tmp/b-08 -S examples/08_d1013487_source_code_part5 -DCMAKE_BUILD_TYPE=Release
+cmake --build /tmp/b-08 --parallel "$JOBS"
 ```
 
 ## Layout
@@ -60,9 +61,12 @@ libs/hbb_common/
   src/                      — ported module sources
   protos/                   — upstream .proto files (+ C++ scoping fixes, see step 07)
   protos/gen/               — checked-in protoc output (regen: step 07 README)
-src/main.cpp                — live code (current step state)
+src/main.cpp                — live placeholder binary (tracks HEAD step)
+src/common.cpp              — app entry-layer impl (NAT/rendezvous/update tasks, step 08)
 src/platform/windows.cc     — upstream Win32 helpers, verbatim (WIN32-only build)
 src/tray-icon.ico           — upstream icon, verbatim
+include/rustdesk/
+  common.hpp                — app entry-layer header (src/common.rs parity, step 08)
 tests/                      — CTest parity for upstream #[cfg(test)] modules
 examples/
   INDEX.md                  — step index (upstream hash, date, subject)
@@ -82,6 +86,8 @@ examples/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 06
   07_d1013487_source_code_part4/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 07
+  08_d1013487_source_code_part5/
+    ... + libs/ src/ include/ tests/ cmake/ LICENSE — full frozen workspace for step 08
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`

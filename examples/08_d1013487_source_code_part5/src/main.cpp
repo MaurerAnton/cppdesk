@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 08 (part 5 of upstream d1013487 "source code").
+// main.cpp — cppdesk step 08 (frozen snapshot, part 5 of upstream d1013487).
 //
 // src/main.rs argv dispatch is deferred until server/ui/platform land, so the
 // binary stays a step placeholder — but it now links the rustdesk::common
