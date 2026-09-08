@@ -18,12 +18,13 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 | 04 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 1: workspace + hbb_common core | `examples/04_d1013487_source_code_part1/` |
 | 05 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 2: config + fs layer | `examples/05_d1013487_source_code_part2/` |
 | 06 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 3: transport (tcp/udp) | `examples/06_d1013487_source_code_part3/` |
+| 07 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 4: protobuf structs | `examples/07_d1013487_source_code_part4/` |
 
 One upstream commit may span several steps when it is too large for a single
 accurate port (here `d1013487`: 175 files). Parts are numbered in the step
 subject until the commit is fully translated.
 
-Next in upstream `master` order: `d1013487` parts 4+ (protos, app modules),
+Next in upstream `master` order: `d1013487` parts 5+ (app modules),
 then `f43f5df9`.
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
@@ -31,7 +32,7 @@ Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 ## Building (root or any snapshot)
 
 Agent builds MUST follow [AGENTS.md](AGENTS.md): gate `-j` on available RAM
-(`<1 GB` wait, `1 GB` → `-j1`, `2 GB` → `-j2`, `3 GB+` → `-j3`, never above `-j3`).
+(`<1.5 GB` wait, `1.5 GB` → `-j1`, `3 GB` → `-j2`, `4.5 GB+` → `-j3`, never above `-j3`).
 
 ```bash
 cmake -B /tmp/cppdesk-build -S . -DCMAKE_BUILD_TYPE=Release
@@ -42,8 +43,8 @@ cmake --build /tmp/cppdesk-build --parallel "$JOBS"  # $JOBS from AGENTS.md rule
 Each `examples/NN_*/` snapshot builds standalone the same way:
 
 ```bash
-cmake -B /tmp/b-05 -S examples/05_d1013487_source_code_part2 -DCMAKE_BUILD_TYPE=Release
-cmake --build /tmp/b-05 --parallel "$JOBS"
+cmake -B /tmp/b-07 -S examples/07_d1013487_source_code_part4 -DCMAKE_BUILD_TYPE=Release
+cmake --build /tmp/b-07 --parallel "$JOBS"
 ```
 
 ## Layout
@@ -54,9 +55,11 @@ CMakeLists.txt              — live build (current step state)
 cmake/version.hpp.in        — version template (build.rs gen_version() parity)
 LICENSE                     — upstream license, verbatim
 libs/hbb_common/
-  include/hbb_common/       — ported module headers (addr_mangle, bytes_codec, compress, util)
+  include/hbb_common/       — ported module headers (addr_mangle, bytes_codec, compress, util,
+                              toml, config, tcp, udp)
   src/                      — ported module sources
-  protos/                   — upstream .proto files, verbatim (C++ mapping: protos step)
+  protos/                   — upstream .proto files (+ C++ scoping fixes, see step 07)
+  protos/gen/               — checked-in protoc output (regen: step 07 README)
 src/main.cpp                — live code (current step state)
 src/platform/windows.cc     — upstream Win32 helpers, verbatim (WIN32-only build)
 src/tray-icon.ico           — upstream icon, verbatim
@@ -77,6 +80,8 @@ examples/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 05
   06_d1013487_source_code_part3/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 06
+  07_d1013487_source_code_part4/
+    ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 07
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`
