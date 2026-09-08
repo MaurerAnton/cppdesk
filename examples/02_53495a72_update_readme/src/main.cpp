@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 02.
+// main.cpp — cppdesk step 02 (frozen snapshot).
 //
 // Translation of rustdesk/rustdesk@53495a72 ("Update README.md", 2020-09-28).
 // Rust original: README.md only — replaces the GitHub profile template with
@@ -12,8 +12,8 @@
 // upstream sources land with d1013487 "source code").
 //
 // Smoke test (JOBS per AGENTS.md RAM rule):
-//   cmake -B /tmp/b -S . -DCMAKE_BUILD_TYPE=Release && \
-//   cmake --build /tmp/b --parallel "$JOBS" && /tmp/b/cppdesk
+//   cmake -B /tmp/b-02 -S . -DCMAKE_BUILD_TYPE=Release && \
+//   cmake --build /tmp/b-02 --parallel "$JOBS" && /tmp/b-02/cppdesk
 
 #include <iostream>
 
