@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 03.
+// main.cpp — cppdesk step 03 (frozen snapshot).
 //
 // Translation of rustdesk/rustdesk@002fce13 ("funnding", 2021-03-17).
 // Rust original: adds `.github/FUNDING.yml` only (one line:
@@ -11,8 +11,8 @@
 // sources land with d1013487 "source code").
 //
 // Smoke test (JOBS per AGENTS.md RAM rule):
-//   cmake -B /tmp/b -S . -DCMAKE_BUILD_TYPE=Release && \
-//   cmake --build /tmp/b --parallel "$JOBS" && /tmp/b/cppdesk
+//   cmake -B /tmp/b-03 -S . -DCMAKE_BUILD_TYPE=Release && \
+//   cmake --build /tmp/b-03 --parallel "$JOBS" && /tmp/b-03/cppdesk
 
 #include <iostream>
 

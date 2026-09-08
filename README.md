@@ -14,9 +14,10 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 |------|-----------------|------|-------------|----------|
 | 01 | [`35b260e1`](https://github.com/rustdesk/rustdesk/commit/35b260e13a7b135f0a9844c27a05316eceeadbcd) | 2020-09-28 | Initial commit (README profile template, no code) | `examples/01_35b260e1_initial_commit/` |
 | 02 | [`53495a72`](https://github.com/rustdesk/rustdesk/commit/53495a72e4c215277c192aa0e52522c28d3dc439) | 2020-09-28 | Update README.md (real tagline, still no code) | `examples/02_53495a72_update_readme/` |
+| 03 | [`002fce13`](https://github.com/rustdesk/rustdesk/commit/002fce136c5e32e7c1c4b1cf21e834f4b220c0fa) | 2021-03-17 | funnding (adds .github/FUNDING.yml, still no code) | `examples/03_002fce13_funnding/` |
 
-Next in upstream `master` order: `002fce13` ("funnding"), then `d1013487`
-("source code" — first real Rust sources).
+Next in upstream `master` order: `d1013487` ("source code" — first real
+Rust sources).
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 
@@ -52,6 +53,8 @@ examples/
     src/main.cpp            — frozen code for step 01
   02_53495a72_update_readme/
     ...                     — same frozen shape for step 02
+  03_002fce13_funnding/
+    ... + .github/FUNDING.yml — same frozen shape for step 03
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`
