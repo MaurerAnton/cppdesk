@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 04 (part 1 of upstream d1013487 "source code").
+// main.cpp — cppdesk step 04 (frozen snapshot, part 1 of upstream d1013487).
 //
 // src/main.rs (148 lines: argv dispatch into client/server/ui entry points)
 // is deferred until its callees are ported, so the binary stays a step

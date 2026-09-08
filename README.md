@@ -15,9 +15,14 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 | 01 | [`35b260e1`](https://github.com/rustdesk/rustdesk/commit/35b260e13a7b135f0a9844c27a05316eceeadbcd) | 2020-09-28 | Initial commit (README profile template, no code) | `examples/01_35b260e1_initial_commit/` |
 | 02 | [`53495a72`](https://github.com/rustdesk/rustdesk/commit/53495a72e4c215277c192aa0e52522c28d3dc439) | 2020-09-28 | Update README.md (real tagline, still no code) | `examples/02_53495a72_update_readme/` |
 | 03 | [`002fce13`](https://github.com/rustdesk/rustdesk/commit/002fce136c5e32e7c1c4b1cf21e834f4b220c0fa) | 2021-03-17 | funnding (adds .github/FUNDING.yml, still no code) | `examples/03_002fce13_funnding/` |
+| 04 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 1: workspace + hbb_common core | `examples/04_d1013487_source_code_part1/` |
 
-Next in upstream `master` order: `d1013487` ("source code" — first real
-Rust sources).
+One upstream commit may span several steps when it is too large for a single
+accurate port (here `d1013487`: 175 files). Parts are numbered in the step
+subject until the commit is fully translated.
+
+Next in upstream `master` order: `d1013487` parts 2+ (config/fs, transport,
+protos, app modules), then `f43f5df9`.
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 
@@ -44,7 +49,16 @@ cmake --build /tmp/b-01 --parallel "$JOBS"
 ```
 AGENTS.md                   — agent instructions (mandatory RAM-based -j rule)
 CMakeLists.txt              — live build (current step state)
+cmake/version.hpp.in        — version template (build.rs gen_version() parity)
+LICENSE                     — upstream license, verbatim
+libs/hbb_common/
+  include/hbb_common/       — ported module headers (addr_mangle, bytes_codec, compress, util)
+  src/                      — ported module sources
+  protos/                   — upstream .proto files, verbatim (C++ mapping: protos step)
 src/main.cpp                — live code (current step state)
+src/platform/windows.cc     — upstream Win32 helpers, verbatim (WIN32-only build)
+src/tray-icon.ico           — upstream icon, verbatim
+tests/                      — CTest parity for upstream #[cfg(test)] modules
 examples/
   INDEX.md                  — step index (upstream hash, date, subject)
   01_35b260e1_initial_commit/
@@ -55,6 +69,8 @@ examples/
     ...                     — same frozen shape for step 02
   03_002fce13_funnding/
     ... + .github/FUNDING.yml — same frozen shape for step 03
+  04_d1013487_source_code_part1/
+    ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 04
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`

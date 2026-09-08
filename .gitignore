@@ -6,3 +6,13 @@ cmake_install.cmake
 *.o
 *.a
 *.so
+# --- carried over from upstream .gitignore (d1013487), translated where needed ---
+.idea
+.DS_Store
+__pycache__
+*dmg
+extractor
+# upstream `src/version.rs` (written by hbb_common::gen_version() at build
+# time) -> our generated header lives in the CMake binary dir, never in-tree,
+# so there is nothing to ignore for it here.
+# upstream `src/ui/inline.rs` (sciter codegen) -> re-added with the UI step.

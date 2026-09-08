@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
+# Frozen snapshot of step 04 (part 1 of upstream d1013487). Identical to the
+# root build at step 04 except for the project name.
 # Version parity: Cargo.toml [package] version = "1.1.2".
-project(cppdesk VERSION 1.1.2 LANGUAGES CXX)
+project(cppdesk_04_d1013487_source_code_part1 VERSION 1.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,9 +15,6 @@ configure_file(
     @ONLY
 )
 
-# Workspace parity: Cargo.toml [workspace] members scrap/hbb_common/enigo.
-# Only hbb_common exists yet (part 1 of d1013487); scrap/enigo arrive as
-# native C++ modules in later steps, mirroring the old cppdesk libs/ layout.
 add_subdirectory(libs/hbb_common)
 
 add_executable(cppdesk src/main.cpp)
