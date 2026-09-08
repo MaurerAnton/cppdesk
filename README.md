@@ -16,13 +16,14 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 | 02 | [`53495a72`](https://github.com/rustdesk/rustdesk/commit/53495a72e4c215277c192aa0e52522c28d3dc439) | 2020-09-28 | Update README.md (real tagline, still no code) | `examples/02_53495a72_update_readme/` |
 | 03 | [`002fce13`](https://github.com/rustdesk/rustdesk/commit/002fce136c5e32e7c1c4b1cf21e834f4b220c0fa) | 2021-03-17 | funnding (adds .github/FUNDING.yml, still no code) | `examples/03_002fce13_funnding/` |
 | 04 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 1: workspace + hbb_common core | `examples/04_d1013487_source_code_part1/` |
+| 05 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 2: config + fs layer | `examples/05_d1013487_source_code_part2/` |
 
 One upstream commit may span several steps when it is too large for a single
 accurate port (here `d1013487`: 175 files). Parts are numbered in the step
 subject until the commit is fully translated.
 
-Next in upstream `master` order: `d1013487` parts 2+ (config/fs, transport,
-protos, app modules), then `f43f5df9`.
+Next in upstream `master` order: `d1013487` parts 3+ (transport, protos,
+app modules), then `f43f5df9`.
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 
@@ -40,8 +41,8 @@ cmake --build /tmp/cppdesk-build --parallel "$JOBS"  # $JOBS from AGENTS.md rule
 Each `examples/NN_*/` snapshot builds standalone the same way:
 
 ```bash
-cmake -B /tmp/b-01 -S examples/01_35b260e1_initial_commit -DCMAKE_BUILD_TYPE=Release
-cmake --build /tmp/b-01 --parallel "$JOBS"
+cmake -B /tmp/b-05 -S examples/05_d1013487_source_code_part2 -DCMAKE_BUILD_TYPE=Release
+cmake --build /tmp/b-05 --parallel "$JOBS"
 ```
 
 ## Layout
@@ -71,6 +72,8 @@ examples/
     ... + .github/FUNDING.yml — same frozen shape for step 03
   04_d1013487_source_code_part1/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 04
+  05_d1013487_source_code_part2/
+    ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 05
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`
