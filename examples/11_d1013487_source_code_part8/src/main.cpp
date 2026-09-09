@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 11 (part 8 of upstream d1013487 "source code").
+// main.cpp — cppdesk step 11 (frozen snapshot, part 8 of upstream d1013487).
 //
 // src/main.rs argv dispatch is deferred until server/ui/platform land, so the
 // binary stays a step placeholder — now linking the client login layer
