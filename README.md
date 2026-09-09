@@ -20,13 +20,14 @@ Method mirrors the `stepbystep` branch of `progressive-server`
 | 06 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 3: transport (tcp/udp) | `examples/06_d1013487_source_code_part3/` |
 | 07 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 4: protobuf structs | `examples/07_d1013487_source_code_part4/` |
 | 08 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 5: app common + Config methods | `examples/08_d1013487_source_code_part5/` |
+| 09 | [`d1013487`](https://github.com/rustdesk/rustdesk/commit/d1013487e2f3862e2f801ef1a704bb61fdff8bbb) | 2021-03-29 | source code, part 6: fs file-transfer jobs | `examples/09_d1013487_source_code_part6/` |
 
 One upstream commit may span several steps when it is too large for a single
 accurate port (here `d1013487`: 175 files). Parts are numbered in the step
 subject until the commit is fully translated.
 
-Next in upstream `master` order: `d1013487` parts 6+ (fs jobs, rendezvous,
-client/server/platform/ui), then `f43f5df9`.
+Next in upstream `master` order: `d1013487` parts 7+ (rendezvous mediator,
+client/server/platform/ui, entry), then `f43f5df9`.
 
 Full per-step log: [examples/INDEX.md](examples/INDEX.md).
 
@@ -44,8 +45,8 @@ cmake --build /tmp/cppdesk-build --parallel "$JOBS"  # $JOBS from AGENTS.md rule
 Each `examples/NN_*/` snapshot builds standalone the same way:
 
 ```bash
-cmake -B /tmp/b-08 -S examples/08_d1013487_source_code_part5 -DCMAKE_BUILD_TYPE=Release
-cmake --build /tmp/b-08 --parallel "$JOBS"
+cmake -B /tmp/b-09 -S examples/09_d1013487_source_code_part6 -DCMAKE_BUILD_TYPE=Release
+cmake --build /tmp/b-09 --parallel "$JOBS"
 ```
 
 ## Layout
@@ -57,7 +58,7 @@ cmake/version.hpp.in        — version template (build.rs gen_version() parity)
 LICENSE                     — upstream license, verbatim
 libs/hbb_common/
   include/hbb_common/       — ported module headers (addr_mangle, bytes_codec, compress, util,
-                              toml, config, tcp, udp)
+                              toml, config, tcp, udp, fs)
   src/                      — ported module sources
   protos/                   — upstream .proto files (+ C++ scoping fixes, see step 07)
   protos/gen/               — checked-in protoc output (regen: step 07 README)
@@ -88,6 +89,8 @@ examples/
     ... + libs/ tests/ cmake/ LICENSE — full frozen workspace for step 07
   08_d1013487_source_code_part5/
     ... + libs/ src/ include/ tests/ cmake/ LICENSE — full frozen workspace for step 08
+  09_d1013487_source_code_part6/
+    ... + libs/ src/ include/ tests/ cmake/ LICENSE — full frozen workspace for step 09
 ```
 
 Rule: the repo root always reflects the latest translated step; `examples/`
