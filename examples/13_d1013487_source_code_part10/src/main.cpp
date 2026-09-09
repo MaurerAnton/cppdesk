@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 13 (part 10 of upstream d1013487 "source code").
+// main.cpp — cppdesk step 13 (frozen snapshot, part 10 of upstream d1013487).
 //
 // src/main.rs argv dispatch is deferred until ipc/platform/ui land, so the
 // binary stays a step placeholder — now linking the server foundation

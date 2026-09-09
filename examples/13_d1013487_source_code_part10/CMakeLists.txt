@@ -1,6 +1,8 @@
+# Frozen snapshot of step 13 (part 10 of upstream d1013487). Identical to the
+# root build at step 13 except for the project name.
 cmake_minimum_required(VERSION 3.20)
 # Version parity: Cargo.toml [package] version = "1.1.2".
-project(cppdesk VERSION 1.1.2 LANGUAGES CXX)
+project(cppdesk_13_d1013487_source_code_part10 VERSION 1.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

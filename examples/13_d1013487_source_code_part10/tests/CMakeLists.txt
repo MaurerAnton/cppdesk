@@ -5,11 +5,7 @@ cmake_minimum_required(VERSION 3.20)
 function(cppdesk_test name)
     add_executable(${name} ${name}.cpp)
     target_link_libraries(${name} PRIVATE hbb_common)
-    if (name STREQUAL "test_client" OR name STREQUAL "test_mediator")
-        add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-    else()
-        add_test(NAME ${name} COMMAND ${name})
-    endif()
+    add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
 # libs/hbb_common/src/bytes_codec.rs #[cfg(test)] parity (test_codec1..6).
