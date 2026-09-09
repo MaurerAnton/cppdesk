@@ -1,4 +1,4 @@
-// main.cpp — cppdesk step 10 (part 7 of upstream d1013487 "source code").
+// main.cpp — cppdesk step 10 (frozen snapshot, part 7 of upstream d1013487).
 //
 // src/main.rs argv dispatch is deferred until server/ui/platform land, so the
 // binary stays a step placeholder — now linking the rendezvous mediator
