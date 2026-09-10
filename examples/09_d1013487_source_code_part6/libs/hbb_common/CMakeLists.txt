@@ -16,10 +16,57 @@
 # protobuf-codegen-pure on protos/*.proto). Regenerate with:
 #   protoc --proto_path=protos --cpp_out=protos/gen protos/*.proto
 # Requires protoc >= 3.x; system libprotobuf at build time (offline-safe).
-find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
-find_library(PROTOBUF_LIBRARY NAMES protobuf)
-if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
-    message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
+# protobuf >= 22 links Abseil, whose transitive DSOs must appear on the
+# link line; the CONFIG package target carries them. The top-level
+# CMakeLists normally defines cppdesk_protobuf first — the fallback keeps
+# this subdirectory standalone-buildable.
+if(NOT TARGET cppdesk_protobuf)
+    find_package(Protobuf CONFIG QUIET)
+    add_library(cppdesk_protobuf INTERFACE)
+    if(TARGET protobuf::libprotobuf)
+        target_link_libraries(cppdesk_protobuf INTERFACE protobuf::libprotobuf)
+    else()
+        find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
+        find_library(PROTOBUF_LIBRARY NAMES protobuf)
+        if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
+            message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
+        endif()
+        target_include_directories(cppdesk_protobuf INTERFACE ${PROTOBUF_INCLUDE_DIR})
+        target_link_libraries(cppdesk_protobuf INTERFACE ${PROTOBUF_LIBRARY})
+    endif()
+endif()
+
+# Generated protobuf structs (upstream build.rs parity): generate at build
+# time with the local protoc. The checked-in protos/gen copies are pinned to
+# the exact protoc that produced them (PROTOBUF_VERSION equality check in the
+# generated headers) and fail on other distro versions — they remain only as
+# a fallback for systems without protoc.
+if(TARGET protobuf::protoc)
+    set(PROTOC_CMD protobuf::protoc)
+elseif(Protobuf_PROTOC_EXECUTABLE)
+    set(PROTOC_CMD "${Protobuf_PROTOC_EXECUTABLE}")
+else()
+    find_program(PROTOC_CMD NAMES protoc)
+endif()
+
+set(PB_PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos")
+set(PB_PROTOS "${PB_PROTO_DIR}/message.proto" "${PB_PROTO_DIR}/rendezvous.proto")
+set(PB_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/protos_gen")
+if(PROTOC_CMD)
+    file(MAKE_DIRECTORY "${PB_GEN_DIR}")
+    set(PB_SRCS "${PB_GEN_DIR}/message.pb.cc" "${PB_GEN_DIR}/rendezvous.pb.cc")
+    add_custom_command(
+        OUTPUT ${PB_SRCS}
+        COMMAND ${PROTOC_CMD} --proto_path=${PB_PROTO_DIR}
+                --cpp_out=${PB_GEN_DIR} ${PB_PROTOS}
+        DEPENDS ${PB_PROTOS}
+        COMMENT "Generating protobuf sources"
+        VERBATIM)
+    set(PB_INCLUDE_DIR "${PB_GEN_DIR}")
+else()
+    set(PB_SRCS protos/gen/message.pb.cc protos/gen/rendezvous.pb.cc)
+    set(PB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos/gen")
+    message(WARNING "protoc not found — using checked-in protos/gen (version-locked)")
 endif()
 
 add_library(hbb_common STATIC
@@ -32,10 +79,9 @@ add_library(hbb_common STATIC
     src/tcp.cpp
     src/udp.cpp
     src/fs.cpp
-    protos/gen/message.pb.cc
-    protos/gen/rendezvous.pb.cc
+    ${PB_SRCS}
 )
-target_include_directories(hbb_common PUBLIC include protos/gen)
+target_include_directories(hbb_common PUBLIC include "${PB_INCLUDE_DIR}")
 target_compile_features(hbb_common PUBLIC cxx_std_20)
 
 # compress.cpp needs <zstd.h> + libzstd (upstream: zstd crate; system here so
@@ -48,5 +94,4 @@ if(NOT ZSTD_INCLUDE_DIR OR NOT ZSTD_LIBRARY)
         "upstream carries zstd via cargo, later steps vendor it via the system package manager")
 endif()
 target_include_directories(hbb_common PRIVATE ${ZSTD_INCLUDE_DIR})
-target_include_directories(hbb_common PRIVATE ${PROTOBUF_INCLUDE_DIR})
-target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} ${PROTOBUF_LIBRARY})
+target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} cppdesk_protobuf)

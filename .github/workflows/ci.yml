@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ stepbystep, next ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ \
+            libprotobuf-dev protobuf-compiler libsodium-dev \
+            libzstd-dev libssl-dev
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      # AGENTS.md: parallelism is capped at -j3 regardless of core count.
+      - name: Build
+        run: cmake --build build --parallel 3
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  snapshots:
+    # The README promises each examples/NN_*/ snapshot builds standalone.
+    # Snapshots 01-06 carry no code; 07 is the first with protobuf.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        snapshot:
+          - 07_d1013487_source_code_part4
+          - 08_d1013487_source_code_part5
+          - 09_d1013487_source_code_part6
+          - 10_d1013487_source_code_part7
+          - 11_d1013487_source_code_part8
+          - 12_d1013487_source_code_part9
+          - 13_d1013487_source_code_part10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ \
+            libprotobuf-dev protobuf-compiler libsodium-dev \
+            libzstd-dev libssl-dev
+
+      - name: Configure
+        run: cmake -B build -S examples/${{ matrix.snapshot }} -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel 3

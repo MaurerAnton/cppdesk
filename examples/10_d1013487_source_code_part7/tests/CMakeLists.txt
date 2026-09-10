@@ -34,7 +34,6 @@ target_sources(test_common PRIVATE ../src/common.cpp)
 target_include_directories(
     test_common
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )
 # fs.rs file-transfer jobs (read_dir, recursive enum, block round-trip).
@@ -47,6 +46,5 @@ target_sources(test_mediator PRIVATE ../src/rendezvous_mediator.cpp ../src/commo
 target_include_directories(
     test_mediator
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )

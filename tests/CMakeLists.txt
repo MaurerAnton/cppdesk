@@ -38,7 +38,6 @@ target_sources(test_common PRIVATE ../src/common.cpp)
 target_include_directories(
     test_common
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )
 # fs.rs file-transfer jobs (read_dir, recursive enum, block round-trip).
@@ -62,7 +61,6 @@ target_sources(
 target_include_directories(
     test_server
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )
 # client.rs login config + handshake helpers (hermetic HOME redirect +
@@ -74,7 +72,6 @@ target_sources(test_client PRIVATE ../src/client.cpp ../src/common.cpp ../src/ke
 target_include_directories(
     test_client
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )
 find_path(TEST_OPENSSL_INCLUDE_DIR NAMES openssl/sha.h)
@@ -89,6 +86,5 @@ target_sources(test_mediator PRIVATE ../src/rendezvous_mediator.cpp ../src/commo
 target_include_directories(
     test_mediator
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )
