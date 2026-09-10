@@ -133,6 +133,13 @@ def patch_root(path):
                             ROOT_BLOCK + "add_subdirectory(libs/hbb_common)", 1)
         text = text.replace("${PROTOBUF_LIBRARY}", "cppdesk_protobuf")
         changed = True
+    # repair a self-link produced by an earlier revision of this script
+    bad = "target_link_libraries(cppdesk_protobuf INTERFACE cppdesk_protobuf)"
+    if bad in text:
+        text = text.replace(
+            bad,
+            "target_link_libraries(cppdesk_protobuf INTERFACE ${PROTOBUF_LIBRARY})")
+        changed = True
     line = "        libs/hbb_common/protos/gen\n"
     if line in text:
         text = text.replace(line, "")

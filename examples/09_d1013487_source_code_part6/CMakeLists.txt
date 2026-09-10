@@ -28,7 +28,7 @@ else()
         message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
     endif()
     target_include_directories(cppdesk_protobuf INTERFACE ${PROTOBUF_INCLUDE_DIR})
-    target_link_libraries(cppdesk_protobuf INTERFACE cppdesk_protobuf)
+    target_link_libraries(cppdesk_protobuf INTERFACE ${PROTOBUF_LIBRARY})
 endif()
 
 add_subdirectory(libs/hbb_common)
