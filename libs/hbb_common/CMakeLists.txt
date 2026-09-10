@@ -16,10 +16,25 @@
 # protobuf-codegen-pure on protos/*.proto). Regenerate with:
 #   protoc --proto_path=protos --cpp_out=protos/gen protos/*.proto
 # Requires protoc >= 3.x; system libprotobuf at build time (offline-safe).
-find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
-find_library(PROTOBUF_LIBRARY NAMES protobuf)
-if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
-    message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
+#
+# The top-level CMakeLists defines cppdesk_protobuf (CONFIG package when
+# available, raw paths otherwise). The CONFIG path is required on
+# protobuf >= 22 because Abseil's DSOs must be linked explicitly. The
+# fallback keeps standalone builds of this subdirectory working.
+if(NOT TARGET cppdesk_protobuf)
+    find_package(Protobuf CONFIG QUIET)
+    add_library(cppdesk_protobuf INTERFACE)
+    if(TARGET protobuf::libprotobuf)
+        target_link_libraries(cppdesk_protobuf INTERFACE protobuf::libprotobuf)
+    else()
+        find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
+        find_library(PROTOBUF_LIBRARY NAMES protobuf)
+        if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
+            message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
+        endif()
+        target_include_directories(cppdesk_protobuf INTERFACE ${PROTOBUF_INCLUDE_DIR})
+        target_link_libraries(cppdesk_protobuf INTERFACE ${PROTOBUF_LIBRARY})
+    endif()
 endif()
 
 add_library(hbb_common STATIC
@@ -49,8 +64,7 @@ if(NOT ZSTD_INCLUDE_DIR OR NOT ZSTD_LIBRARY)
         "upstream carries zstd via cargo, later steps vendor it via the system package manager")
 endif()
 target_include_directories(hbb_common PRIVATE ${ZSTD_INCLUDE_DIR})
-target_include_directories(hbb_common PRIVATE ${PROTOBUF_INCLUDE_DIR})
-target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} ${PROTOBUF_LIBRARY})
+target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} cppdesk_protobuf)
 
 # crypto.cpp needs <sodium.h> + libsodium (upstream: sodiumoxide crate).
 find_path(SODIUM_INCLUDE_DIR NAMES sodium.h)

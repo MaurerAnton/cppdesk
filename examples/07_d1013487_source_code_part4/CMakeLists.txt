@@ -13,6 +13,24 @@ configure_file(
     @ONLY
 )
 
+# Protobuf: prefer the package config (protobuf >= 22 links Abseil, whose
+# transitive DSOs must appear on the link line — a raw find_library() link
+# fails with "DSO missing from command line"). The interface target below
+# is inherited by libs/hbb_common.
+find_package(Protobuf CONFIG QUIET)
+add_library(cppdesk_protobuf INTERFACE)
+if(TARGET protobuf::libprotobuf)
+    target_link_libraries(cppdesk_protobuf INTERFACE protobuf::libprotobuf)
+else()
+    find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
+    find_library(PROTOBUF_LIBRARY NAMES protobuf)
+    if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
+        message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
+    endif()
+    target_include_directories(cppdesk_protobuf INTERFACE ${PROTOBUF_INCLUDE_DIR})
+    target_link_libraries(cppdesk_protobuf INTERFACE cppdesk_protobuf)
+endif()
+
 add_subdirectory(libs/hbb_common)
 
 add_executable(cppdesk src/main.cpp)
