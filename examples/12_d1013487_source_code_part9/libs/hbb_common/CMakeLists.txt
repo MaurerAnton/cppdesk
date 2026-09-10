@@ -36,6 +36,39 @@ if(NOT TARGET cppdesk_protobuf)
     endif()
 endif()
 
+# Generated protobuf structs (upstream build.rs parity): generate at build
+# time with the local protoc. The checked-in protos/gen copies are pinned to
+# the exact protoc that produced them (PROTOBUF_VERSION equality check in the
+# generated headers) and fail on other distro versions — they remain only as
+# a fallback for systems without protoc.
+if(TARGET protobuf::protoc)
+    set(PROTOC_CMD protobuf::protoc)
+elseif(Protobuf_PROTOC_EXECUTABLE)
+    set(PROTOC_CMD "${Protobuf_PROTOC_EXECUTABLE}")
+else()
+    find_program(PROTOC_CMD NAMES protoc)
+endif()
+
+set(PB_PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos")
+set(PB_PROTOS "${PB_PROTO_DIR}/message.proto" "${PB_PROTO_DIR}/rendezvous.proto")
+set(PB_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/protos_gen")
+if(PROTOC_CMD)
+    file(MAKE_DIRECTORY "${PB_GEN_DIR}")
+    set(PB_SRCS "${PB_GEN_DIR}/message.pb.cc" "${PB_GEN_DIR}/rendezvous.pb.cc")
+    add_custom_command(
+        OUTPUT ${PB_SRCS}
+        COMMAND ${PROTOC_CMD} --proto_path=${PB_PROTO_DIR}
+                --cpp_out=${PB_GEN_DIR} ${PB_PROTOS}
+        DEPENDS ${PB_PROTOS}
+        COMMENT "Generating protobuf sources"
+        VERBATIM)
+    set(PB_INCLUDE_DIR "${PB_GEN_DIR}")
+else()
+    set(PB_SRCS protos/gen/message.pb.cc protos/gen/rendezvous.pb.cc)
+    set(PB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos/gen")
+    message(WARNING "protoc not found — using checked-in protos/gen (version-locked)")
+endif()
+
 add_library(hbb_common STATIC
     src/addr_mangle.cpp
     src/util.cpp
@@ -47,10 +80,9 @@ add_library(hbb_common STATIC
     src/udp.cpp
     src/fs.cpp
     src/crypto.cpp
-    protos/gen/message.pb.cc
-    protos/gen/rendezvous.pb.cc
+    ${PB_SRCS}
 )
-target_include_directories(hbb_common PUBLIC include protos/gen)
+target_include_directories(hbb_common PUBLIC include "${PB_INCLUDE_DIR}")
 target_compile_features(hbb_common PUBLIC cxx_std_20)
 
 # compress.cpp needs <zstd.h> + libzstd (upstream: zstd crate; system here so

@@ -41,7 +41,6 @@ target_include_directories(
     PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}/generated"
         include
-        libs/hbb_common/protos/gen
 )
 target_link_libraries(cppdesk PRIVATE hbb_common cppdesk_protobuf)
 # NOTE: PROTOBUF_LIBRARY is found in libs/hbb_common (find_library caches

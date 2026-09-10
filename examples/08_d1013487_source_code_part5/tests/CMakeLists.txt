@@ -34,6 +34,5 @@ target_sources(test_common PRIVATE ../src/common.cpp)
 target_include_directories(
     test_common
     PRIVATE
-        ../libs/hbb_common/protos/gen
         ${CMAKE_BINARY_DIR}/generated
 )

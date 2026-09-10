@@ -59,7 +59,6 @@ target_include_directories(
         "${CMAKE_CURRENT_BINARY_DIR}/generated"
         include
         # generated protobuf headers (common.hpp includes message.pb.h)
-        libs/hbb_common/protos/gen
         ${OPENSSL_INCLUDE_DIR}
 )
 target_link_libraries(cppdesk PRIVATE hbb_common cppdesk_protobuf ${CRYPTO_LIBRARY})

@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
-"""Apply the protobuf/Abseil CMake fix to the frozen snapshots (07-13).
+"""Apply the protobuf portability fixes to the frozen snapshots (07-13).
 
-protobuf >= 22 links Abseil; the raw find_library() link drops the
-transitive DSOs and fails with "DSO missing from command line". The live
-root was fixed by using the protobuf CONFIG package through a shared
-interface target (cppdesk_protobuf). This script applies the identical
-wiring to the frozen snapshots so the README's "each snapshot builds
-standalone" promise holds on modern distros.
+Two coupled problems on modern distros:
+
+1. protobuf >= 22 links Abseil; a raw find_library() link drops the
+   transitive DSOs and fails with "DSO missing from command line".
+   Fixed by linking the CONFIG package through a shared
+   cppdesk_protobuf interface target.
+
+2. The checked-in protos/gen sources are pinned to the exact protoc that
+   produced them (the generated header asserts PROTOBUF_VERSION equality),
+   so they only build against that one protobuf release. Generate at build
+   time with the local protoc instead (upstream build.rs parity); the
+   checked-in copy stays as a fallback when protoc is missing.
 
 Run from the repo root:  python3 tools/fix_snapshot_protobuf.py
 """
 import glob
 import os
-import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SUB_OLD = """find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
+SUB_OLD_FIND = """find_path(PROTOBUF_INCLUDE_DIR NAMES google/protobuf/message.h)
 find_library(PROTOBUF_LIBRARY NAMES protobuf)
 if(NOT PROTOBUF_INCLUDE_DIR OR NOT PROTOBUF_LIBRARY)
     message(FATAL_ERROR "libprotobuf dev files not found (need message.h + libprotobuf)")
 endif()
 """
 
-SUB_NEW = """# protobuf >= 22 links Abseil, whose transitive DSOs must appear on the
+SUB_NEW_FIND = """# protobuf >= 22 links Abseil, whose transitive DSOs must appear on the
 # link line; the CONFIG package target carries them. The top-level
 # CMakeLists normally defines cppdesk_protobuf first — the fallback keeps
 # this subdirectory standalone-buildable.
@@ -42,6 +47,41 @@ if(NOT TARGET cppdesk_protobuf)
         target_link_libraries(cppdesk_protobuf INTERFACE ${PROTOBUF_LIBRARY})
     endif()
 endif()
+"""
+
+SUB_GEN_BLOCK = """# Generated protobuf structs (upstream build.rs parity): generate at build
+# time with the local protoc. The checked-in protos/gen copies are pinned to
+# the exact protoc that produced them (PROTOBUF_VERSION equality check in the
+# generated headers) and fail on other distro versions — they remain only as
+# a fallback for systems without protoc.
+if(TARGET protobuf::protoc)
+    set(PROTOC_CMD protobuf::protoc)
+elseif(Protobuf_PROTOC_EXECUTABLE)
+    set(PROTOC_CMD "${Protobuf_PROTOC_EXECUTABLE}")
+else()
+    find_program(PROTOC_CMD NAMES protoc)
+endif()
+
+set(PB_PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos")
+set(PB_PROTOS "${PB_PROTO_DIR}/message.proto" "${PB_PROTO_DIR}/rendezvous.proto")
+set(PB_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/protos_gen")
+if(PROTOC_CMD)
+    file(MAKE_DIRECTORY "${PB_GEN_DIR}")
+    set(PB_SRCS "${PB_GEN_DIR}/message.pb.cc" "${PB_GEN_DIR}/rendezvous.pb.cc")
+    add_custom_command(
+        OUTPUT ${PB_SRCS}
+        COMMAND ${PROTOC_CMD} --proto_path=${PB_PROTO_DIR}
+                --cpp_out=${PB_GEN_DIR} ${PB_PROTOS}
+        DEPENDS ${PB_PROTOS}
+        COMMENT "Generating protobuf sources"
+        VERBATIM)
+    set(PB_INCLUDE_DIR "${PB_GEN_DIR}")
+else()
+    set(PB_SRCS protos/gen/message.pb.cc protos/gen/rendezvous.pb.cc)
+    set(PB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/protos/gen")
+    message(WARNING "protoc not found — using checked-in protos/gen (version-locked)")
+endif()
+
 """
 
 ROOT_BLOCK = """# Protobuf: prefer the package config (protobuf >= 22 links Abseil, whose
@@ -65,38 +105,66 @@ endif()
 """
 
 
-def patch(path, is_sub):
+def patch_sub(path):
     text = open(path).read()
-    if "cppdesk_protobuf" in text:
+    if "PB_GEN_DIR" in text:
         return "already patched"
-    if is_sub:
-        if SUB_OLD not in text:
-            return "SUB BLOCK NOT FOUND"
-        text = text.replace(SUB_OLD, SUB_NEW)
-        text = text.replace(
-            "target_include_directories(hbb_common PRIVATE ${PROTOBUF_INCLUDE_DIR})\n", "")
-        text = text.replace(
-            "target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} ${PROTOBUF_LIBRARY})",
-            "target_link_libraries(hbb_common PRIVATE ${ZSTD_LIBRARY} cppdesk_protobuf)")
-    else:
-        marker = "add_subdirectory(libs/hbb_common)"
-        if marker not in text:
-            return "add_subdirectory NOT FOUND"
-        text = text.replace(marker, ROOT_BLOCK + marker, 1)
-        text = text.replace("${PROTOBUF_LIBRARY}", "cppdesk_protobuf")
+    if SUB_OLD_FIND in text:
+        text = text.replace(SUB_OLD_FIND, SUB_NEW_FIND)
+    if "add_library(hbb_common STATIC" not in text:
+        return "add_library NOT FOUND"
+    text = text.replace("add_library(hbb_common STATIC",
+                        SUB_GEN_BLOCK + "add_library(hbb_common STATIC", 1)
+    text = text.replace(
+        "    protos/gen/message.pb.cc\n    protos/gen/rendezvous.pb.cc\n",
+        "    ${PB_SRCS}\n")
+    text = text.replace(
+        "target_include_directories(hbb_common PUBLIC include protos/gen)",
+        'target_include_directories(hbb_common PUBLIC include "${PB_INCLUDE_DIR}")')
     open(path, "w").write(text)
     return "patched"
+
+
+def patch_root(path):
+    text = open(path).read()
+    changed = False
+    if "add_subdirectory(libs/hbb_common)" in text and "cppdesk_protobuf" not in text:
+        text = text.replace("add_subdirectory(libs/hbb_common)",
+                            ROOT_BLOCK + "add_subdirectory(libs/hbb_common)", 1)
+        text = text.replace("${PROTOBUF_LIBRARY}", "cppdesk_protobuf")
+        changed = True
+    line = "        libs/hbb_common/protos/gen\n"
+    if line in text:
+        text = text.replace(line, "")
+        changed = True
+    if changed:
+        open(path, "w").write(text)
+        return "patched"
+    return "already patched"
+
+
+def patch_tests(path):
+    text = open(path).read()
+    line = "        ../libs/hbb_common/protos/gen\n"
+    if line in text:
+        open(path, "w").write(text.replace(line, ""))
+        return "patched"
+    return "already patched"
 
 
 def main():
     dirs = sorted(glob.glob(os.path.join(ROOT, "examples", "0[7-9]_*"))
                   + glob.glob(os.path.join(ROOT, "examples", "1[0-3]_*")))
     for d in dirs:
-        for rel, is_sub in (("CMakeLists.txt", False),
-                            (os.path.join("libs", "hbb_common", "CMakeLists.txt"), True)):
-            p = os.path.join(d, rel)
-            if os.path.isfile(p):
-                print(os.path.relpath(p, ROOT), "->", patch(p, is_sub))
+        sub = os.path.join(d, "libs", "hbb_common", "CMakeLists.txt")
+        root = os.path.join(d, "CMakeLists.txt")
+        tests = os.path.join(d, "tests", "CMakeLists.txt")
+        if os.path.isfile(sub):
+            print(os.path.relpath(sub, ROOT), "->", patch_sub(sub))
+        if os.path.isfile(root):
+            print(os.path.relpath(root, ROOT), "->", patch_root(root))
+        if os.path.isfile(tests):
+            print(os.path.relpath(tests, ROOT), "->", patch_tests(tests))
 
 
 if __name__ == "__main__":
